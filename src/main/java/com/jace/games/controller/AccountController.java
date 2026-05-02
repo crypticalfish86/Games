@@ -59,6 +59,27 @@ public class AccountController {
     }
 
     /**
+     * Check if you have valid login credentials.
+     * @param account The account username and password.
+     * @return A response entity containing the valid account or an error status.
+     */
+    @GetMapping(
+            value = "/login",
+            produces = MediaType.APPLICATION_JSON_VALUE,
+            consumes = MediaType.APPLICATION_JSON_VALUE
+    )
+    public ResponseEntity<Account> checkAccountValidity(@RequestBody Account account) {
+        lock.readLock().lock();
+        boolean validDetails = accountRepository.checkAccountValidity(account);
+        lock.readLock().unlock();
+        if (!validDetails) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+        } else {
+            return ResponseEntity.status(HttpStatus.OK).body(account);
+        }
+    }
+
+    /**
      * Make a request to find all profiles of a single account on the server.
      * @param account The account the client sends to ensure the request is a valid account and to determine what list of profiles
      *                it's asking for.
