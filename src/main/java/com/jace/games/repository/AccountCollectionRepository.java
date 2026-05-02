@@ -22,11 +22,11 @@ public class AccountCollectionRepository {
     //test data
     @PostConstruct //post construct auto runs the method after dependency injection (good for filling test data)
     private void initializeTestData() {
-        this.accounts.put("Jace" ,new Account("Jace", "test1", new ArrayList<>(), LocalDateTime.now()));
-        this.accounts.put("Leif", new Account("Leif", "test2", new ArrayList<>(), LocalDateTime.now()));
-        this.accounts.put("Zac" ,new Account("Zac", "test3", new ArrayList<>(), LocalDateTime.now()));
-        this.accounts.put("Jordan", new Account("Jordan", "test4", new ArrayList<>(), LocalDateTime.now()));
-        this.accounts.put("Jade", new Account("Jade", "test5", new ArrayList<>(), LocalDateTime.now()));
+        this.accounts.put("Jace" ,new Account("Jace", "test1", new ArrayList<>(), LocalDateTime.now(), LocalDateTime.now()));
+        this.accounts.put("Leif", new Account("Leif", "test2", new ArrayList<>(), LocalDateTime.now(), LocalDateTime.now()));
+        this.accounts.put("Zac" ,new Account("Zac", "test3", new ArrayList<>(), LocalDateTime.now(), LocalDateTime.now()));
+        this.accounts.put("Jordan", new Account("Jordan", "test4", new ArrayList<>(), LocalDateTime.now(), LocalDateTime.now()));
+        this.accounts.put("Jade", new Account("Jade", "test5", new ArrayList<>(), LocalDateTime.now(), LocalDateTime.now()));
     }
 
     //Data edit/access methods
@@ -37,14 +37,12 @@ public class AccountCollectionRepository {
         return this.accounts.containsKey(username);
     }
 
-    //Check if a password is correct (Not secure, in non-personal project don't do this)
-    public Optional<Boolean> checkPasswordValidity(String username, String password) {
-        if (!this.accounts.containsKey(username)) {
-            return Optional.empty();
-        } else if (this.accounts.get(username).password().equals(password)){
-            return Optional.of(true);
+    //Check if account details are correct password (Not secure, in non-personal project don't do this)
+    public boolean checkAccountValidity(Account accountToCheck) {
+        if (!this.accounts.containsKey(accountToCheck.username())) {
+            return false;
         } else {
-            return Optional.of(false);
+            return this.accounts.get(accountToCheck.username()).password().equals(accountToCheck.password());
         }
     }
 
@@ -96,7 +94,7 @@ public class AccountCollectionRepository {
             }
         }
 
-        Account newAccount = new Account(username, password, new ArrayList<Profile>(), LocalDateTime.now());
+        Account newAccount = new Account(username, password, new ArrayList<Profile>(), LocalDateTime.now(), LocalDateTime.now());
         accounts.put(username, newAccount);
         return newAccount;
     }
