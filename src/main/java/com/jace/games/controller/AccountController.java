@@ -150,7 +150,7 @@ public class AccountController {
      * @param account The account with a username and password to add to the server.
      * @return Response entity containing the successfully added account or an error status if it failed.
      */
-    @PostMapping(value = "")
+    @PostMapping(value = "/users")
     public ResponseEntity<Account> addAccount(
             @RequestBody Account account
     ) {
