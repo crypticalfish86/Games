@@ -53,10 +53,10 @@ public class TicTacToeCollectionRepository {
 
 
     //POST
-    public String startNewGameAndReturnID(Account X, Account O) {
+    public TicTacToeGame startNewGameAndReturnID(Account X, Account O) {
         TicTacToeGame newGame = new TicTacToeGame(X, O);
         this.ticTacToeGames.add(newGame);
-        return newGame.getGameID();
+        return newGame;
     }
 
     //PUT
@@ -82,11 +82,10 @@ public class TicTacToeCollectionRepository {
     }
 
     //DELETE
-    public void deleteActiveGame(String gameID) {
+    public TicTacToeGame deleteActiveGame(String gameID) {
         for (int i = 0; i < this.ticTacToeGames.size(); i++) {
             if (ticTacToeGames.get(i).getGameID().equals(gameID)) {
-                ticTacToeGames.remove(i);
-                return;
+                return ticTacToeGames.remove(i);
             }
         }
         throw new NullPointerException("Error, game not found");

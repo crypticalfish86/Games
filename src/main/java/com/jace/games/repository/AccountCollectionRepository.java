@@ -38,6 +38,15 @@ public class AccountCollectionRepository {
         return this.accounts.containsKey(username);
     }
 
+    //get account
+    public Account getAccount(String username) {
+        if (this.accounts.containsKey(username)) {
+            return accounts.get(username);
+        } else {
+            throw new NullPointerException("No account with this username");
+        }
+    }
+
     //Check if account details are correct password (Not secure, in non-personal project don't do this)
     public boolean checkAccountValidity(Account accountToCheck) {
         if (!this.accounts.containsKey(accountToCheck.username())) {
