@@ -36,8 +36,7 @@ public class AccountController {
      */
     @GetMapping(
             value = "/users",
-            produces = MediaType.APPLICATION_JSON_VALUE,
-            consumes = MediaType.APPLICATION_JSON_VALUE
+            produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<List<String>> findAllAccounts() {
 
@@ -59,8 +58,7 @@ public class AccountController {
      */
     @GetMapping(
             value = "/login",
-            produces = MediaType.APPLICATION_JSON_VALUE,
-            consumes = MediaType.APPLICATION_JSON_VALUE
+            produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<Account> checkAccountValidity(
             @RequestParam(value = "username") String username,
@@ -83,8 +81,7 @@ public class AccountController {
      */
     @GetMapping(
             value = "/profiles",
-            produces = MediaType.APPLICATION_JSON_VALUE,
-            consumes = MediaType.APPLICATION_JSON_VALUE
+            produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<List<Profile>> getAllProfilesOnAccount(
             @RequestParam(value = "username") String username
@@ -108,8 +105,7 @@ public class AccountController {
      */
     @GetMapping(
             value = "/profiles/{gameName}",
-            produces = MediaType.APPLICATION_JSON_VALUE,
-            consumes = MediaType.APPLICATION_JSON_VALUE
+            produces = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<Profile> getSpecificProfileOnAccount(
             @PathVariable(value = "gameName") String gameName,
