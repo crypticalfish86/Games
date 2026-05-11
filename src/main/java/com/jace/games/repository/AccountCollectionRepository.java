@@ -48,11 +48,11 @@ public class AccountCollectionRepository {
     }
 
     //Check if account details are correct password (Not secure, in non-personal project don't do this)
-    public boolean checkAccountValidity(Account accountToCheck) {
-        if (!this.accounts.containsKey(accountToCheck.username())) {
+    public boolean checkAccountValidity(String username, String password) {
+        if (!this.accounts.containsKey(username)) {
             return false;
         } else {
-            return this.accounts.get(accountToCheck.username()).password().equals(accountToCheck.password());
+            return this.accounts.get(username).password().equals(password);
         }
     }
 

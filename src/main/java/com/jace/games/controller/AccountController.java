@@ -7,7 +7,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.ResponseEntity;
 
 import java.util.List;
@@ -33,7 +32,6 @@ public class AccountController {
 
     /**
      * Make a request to find every single account on the server and return their usernames.
-     * @param account The account the client sends to ensure the request is a valid account in the database.
      * @return A response entity detailing either a list of all usernames or an error status.
      */
     @GetMapping(
@@ -41,15 +39,9 @@ public class AccountController {
             produces = MediaType.APPLICATION_JSON_VALUE,
             consumes = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<List<String>> findAllAccounts(@RequestBody Account account) {
+    public ResponseEntity<List<String>> findAllAccounts() {
 
         lock.readLock().lock();
-        //Check if the incoming credentials from the client match an account in the servers records
-        if (!accountRepository.checkAccountValidity(account)) {
-            lock.readLock().unlock();
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
         List<String> allAccounts = accountRepository.findAllAccounts();
         lock.readLock().unlock();
 
@@ -61,7 +53,8 @@ public class AccountController {
 
     /**
      * Check if you have valid login credentials.
-     * @param account The account username and password.
+     * @param username the username of the account you want to check exists.
+     * @param password the password of the account you want to check exists.
      * @return A response entity containing the valid account or an error status.
      */
     @GetMapping(
@@ -69,21 +62,23 @@ public class AccountController {
             produces = MediaType.APPLICATION_JSON_VALUE,
             consumes = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<Account> checkAccountValidity(@RequestBody Account account) {
+    public ResponseEntity<Account> checkAccountValidity(
+            @RequestParam(value = "username") String username,
+            @RequestParam(value = "password") String password
+            ) {
         lock.readLock().lock();
-        boolean validDetails = accountRepository.checkAccountValidity(account);
+        boolean validDetails = accountRepository.checkAccountValidity(username, password);
         lock.readLock().unlock();
         if (!validDetails) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         } else {
-            return ResponseEntity.status(HttpStatus.OK).body(account);
+            return ResponseEntity.status(HttpStatus.OK).build();
         }
     }
 
     /**
      * Make a request to find all profiles of a single account on the server.
-     * @param account The account the client sends to ensure the request is a valid account and to determine what list of profiles
-     *                it's asking for.
+     * @param username the username of the account you want to get profiles from.
      * @return A response entity either containing a list of all profiles on an account, or an error status.
      */
     @GetMapping(
@@ -91,15 +86,11 @@ public class AccountController {
             produces = MediaType.APPLICATION_JSON_VALUE,
             consumes = MediaType.APPLICATION_JSON_VALUE
     )
-    public ResponseEntity<List<Profile>> getAllProfilesOnAccount(@RequestBody Account account) {
+    public ResponseEntity<List<Profile>> getAllProfilesOnAccount(
+            @RequestParam(value = "username") String username
+    ) {
         lock.readLock().lock();
-        //Check if the incoming credentials from the client match an account in the servers records
-        if (!accountRepository.checkAccountValidity(account)) {
-            lock.readLock().unlock();
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
-        Optional<List<Profile>> allProfiles = accountRepository.getAllProfilesOnAccount(account.username());
+        Optional<List<Profile>> allProfiles = accountRepository.getAllProfilesOnAccount(username);
         lock.readLock().unlock();
 
         if (allProfiles.isEmpty()) {
@@ -111,9 +102,8 @@ public class AccountController {
 
     /**
      * Make a request to find a specific game profile of a single account on the server.
-     * @param account The account the client sends to ensure the request is a valid account and to determine what list of profiles
-     *                it's asking for.
-     * @param gameName The name of the game you're trying to request a profile from
+     * @param gameName The name of the game you're trying to request a profile from.
+     * @param username the username of the account you want to get the game profile of.
      * @return A response entity either containing the requested profile or an error status.
      */
     @GetMapping(
@@ -122,18 +112,12 @@ public class AccountController {
             consumes = MediaType.APPLICATION_JSON_VALUE
     )
     public ResponseEntity<Profile> getSpecificProfileOnAccount(
-            @RequestBody Account account,
-            @PathVariable(value = "gameName") String gameName
+            @PathVariable(value = "gameName") String gameName,
+            @RequestParam(value="username") String username
     ) {
         lock.readLock().lock();
-        //Check if the incoming credentials from the client match an account in the servers records
-        if (!accountRepository.checkAccountValidity(account)) {
-            lock.readLock().unlock();
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
         try {
-            Profile profile = accountRepository.getProfileOnAccountByGameName(account.username(), gameName);
+            Profile profile = accountRepository.getProfileOnAccountByGameName(username, gameName);
             lock.readLock().unlock();
             return ResponseEntity.status(HttpStatus.OK).body(profile);
         } catch (Exception e) {
@@ -168,25 +152,19 @@ public class AccountController {
 
     /**
      * Add a new profile to the account.
-     * @param account The account we're adding the profile to.
+     * @param username The username of the account we're adding the profile to.
      * @param gameName The game name of the profile we're adding.
      * @return The account with the newly added profile.
      */
     @PostMapping(value = "profiles/{gameName}")
     public ResponseEntity<Account> addProfileByGameName(
-            @RequestBody Account account,
-            @PathVariable(value = "gameName") String gameName
+            @PathVariable(value = "gameName") String gameName,
+            @RequestParam(value="username") String username
     ) {
         lock.writeLock().lock();
-        //Check if the incoming credentials from the client match an account in the servers records
-        if (!accountRepository.checkAccountValidity(account)) {
-            lock.writeLock().unlock();
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
         //Try adding the profile
         try {
-            Account modifiedAccount = accountRepository.addNewProfileOnAccount(account.username(), gameName);
+            Account modifiedAccount = accountRepository.addNewProfileOnAccount(username, gameName);
             lock.writeLock().unlock();
             return ResponseEntity.status(HttpStatus.CREATED).body(modifiedAccount);
         } catch (Exception e) {
@@ -200,33 +178,27 @@ public class AccountController {
 
     /**
      * Either increment the wins or losses on an account on a specific game.
-     * @param account The account you're incrementing a win/loss on.
+     * @param username The username of the account you're incrementing a win/loss on.
      * @param gameName The name of the game you're incrementing a win/loss on.
      * @param winFlag A flag attached as a query to the url, it's either "true" for wins or "false" for losses.
      * @return A response entity containing the now modified account or an error status.
      */
     @PutMapping(value = {"profiles/{gameName}/increment"})
     public ResponseEntity<Account> incrementWinOrLoss(
-            @RequestBody Account account,
             @PathVariable(value = "gameName", required = true) String gameName,
+            @RequestParam(value = "username", required = true) String username,
             @RequestParam(value = "winFlag", required = true) String winFlag
     ) {
         lock.writeLock().lock();
-        //Check if the incoming credentials from the client match an account in the servers records
-        if (!accountRepository.checkAccountValidity(account)) {
-            lock.writeLock().unlock();
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
-        }
-
         //increment the win or loss depending on the winFlag query part of the domain
         try {
             Account modifiedAccount;
             if (winFlag.equals("true")) {
-                modifiedAccount = accountRepository.incrementWinsOnProfile(account.username(), gameName);
+                modifiedAccount = accountRepository.incrementWinsOnProfile(username, gameName);
                 lock.writeLock().unlock();
                 return ResponseEntity.status(HttpStatus.OK).body(modifiedAccount);
             } else if (winFlag.equals("false")) {
-                modifiedAccount = accountRepository.incrementLossesOnProfile(account.username(), gameName);
+                modifiedAccount = accountRepository.incrementLossesOnProfile(username, gameName);
                 lock.writeLock().unlock();
                 return ResponseEntity.status(HttpStatus.OK).body(modifiedAccount);
             } else {
@@ -250,7 +222,7 @@ public class AccountController {
     public ResponseEntity<Account> deleteAccount(@RequestBody Account account) {
         lock.writeLock().lock();
         //Check if the incoming credentials from the client match an account in the servers records
-        if (!accountRepository.checkAccountValidity(account)) {
+        if (!accountRepository.checkAccountValidity(account.username(), account.password())) {
             lock.writeLock().unlock();
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
