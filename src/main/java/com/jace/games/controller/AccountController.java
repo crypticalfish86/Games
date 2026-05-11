@@ -14,6 +14,7 @@ import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.locks.ReentrantReadWriteLock;
 
+@CrossOrigin(origins = "http://localhost:5173")
 @RestController
 @RequestMapping("/account")
 public class AccountController {

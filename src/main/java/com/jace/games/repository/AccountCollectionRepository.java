@@ -20,7 +20,7 @@ public class AccountCollectionRepository {
     }
 
     //test data
-    /*
+
     @PostConstruct //post construct auto runs the method after dependency injection (good for filling test data)
     private void initializeTestData() {
         this.accounts.put("Jace" ,new Account("Jace", "test1", new ArrayList<>(), LocalDateTime.now(), LocalDateTime.now()));
@@ -29,7 +29,7 @@ public class AccountCollectionRepository {
         this.accounts.put("Jordan", new Account("Jordan", "test4", new ArrayList<>(), LocalDateTime.now(), LocalDateTime.now()));
         this.accounts.put("Jade", new Account("Jade", "test5", new ArrayList<>(), LocalDateTime.now(), LocalDateTime.now()));
     }
-    */
+
     //Data edit/access methods
 
     //GET
