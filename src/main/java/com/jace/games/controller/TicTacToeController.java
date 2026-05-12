@@ -32,7 +32,7 @@ public class TicTacToeController {
 
     //get all past games
     //get all active games
-    @GetMapping("/games/{accountUsername}")
+    @GetMapping("/{accountUsername}")
     public ResponseEntity<List<TicTacToeGame>> getAccountGames(
             @PathVariable(value = "accountUsername") String username,
             @RequestParam(value = "activeGame") String activeGames
@@ -50,7 +50,7 @@ public class TicTacToeController {
     }
 
     //get specific game
-    @GetMapping("/games/{accountUsername}/{gameID}")
+    @GetMapping("/{accountUsername}/{gameID}")
     public ResponseEntity<TicTacToeGame> getSpecificGame(
             @PathVariable(value = "accountUsername") String username,
             @PathVariable(value = "gameID") String gameID
@@ -72,7 +72,7 @@ public class TicTacToeController {
     //POST
 
     //start new game
-    @PostMapping("/games")
+    @PostMapping("")
     public ResponseEntity<TicTacToeGame> newGame(
             @RequestParam(value = "account1") String username1,
             @RequestParam(value = "account2") String username2
@@ -86,7 +86,7 @@ public class TicTacToeController {
     //PUT
 
     //take instruction
-    @PutMapping("/games")
+    @PutMapping("/turn")
     public ResponseEntity<TicTacToeGame> inputTurnInstruction(
             @RequestParam(value = "gameID") String gameID,
             @RequestParam(value = "coordinate") String instruction,
@@ -100,7 +100,7 @@ public class TicTacToeController {
     //DELETE
 
     //delete game
-    @DeleteMapping("/games")
+    @DeleteMapping("")
     public ResponseEntity<TicTacToeGame> deleteActiveGame(
             @RequestParam(value = "gameID") String gameID
     ) {
